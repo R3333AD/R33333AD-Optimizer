@@ -1,0 +1,133 @@
+<Application x:Class="FPSBooster.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <!-- THEMES : sombre (défaut) / clair -->
+    <!-- Couleurs originales (sombre) -->
+    <Color x:Key="BgColor">#09090B</Color>
+    <Color x:Key="SidebarColor">#CC101013</Color>
+    <Color x:Key="CardColor">#B3141417</Color>
+    <Color x:Key="BorderColor">#3A3A42</Color>
+    <Color x:Key="BorderHoverColor">#3F3F46</Color>
+    <Color x:Key="AccentColor">#C8FF2E</Color>
+    <Color x:Key="PanelColor">#B31A1A1F</Color>
+    <Color x:Key="BtnColor">#D81E1E24</Color>
+    <Color x:Key="MutedColor">#8E8E93</Color>
+    <Color x:Key="CardHoverColor">#1C1C21</Color>
+    <!-- Couleurs clair -->
+    <Color x:Key="Light_BgColor">#1C1C1F</Color>
+    <Color x:Key="Light_SidebarColor">#26262B</Color>
+    <Color x:Key="Light_CardColor">#2E2E35</Color>
+    <Color x:Key="Light_BorderColor">#52525B</Color>
+    <Color x:Key="Light_BorderHoverColor">#6A6A72</Color>
+    <Color x:Key="Light_AccentColor">#00B4D8</Color>
+    <Color x:Key="Light_PanelColor">#333338</Color>
+    <Color x:Key="Light_BtnColor">#3F3F46</Color>
+    <Color x:Key="Light_MutedColor">#A1A1AA</Color>
+    <Color x:Key="Light_CardHoverColor">#2E2E35</Color>
+
+    <!-- Couleurs actives (initialisées en code selon le thème) -->
+    <SolidColorBrush x:Key="BgBrush" Color="{StaticResource BgColor}"/>
+    <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}"/>
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
+    <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+    <SolidColorBrush x:Key="BtnBrush" Color="{StaticResource BtnColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource MutedColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+
+    <!-- SIDEBAR BUTTON -->
+    <Style x:Key="NavButtonStyle" TargetType="Button">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#A1A1AA"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="12" Padding="10,0">
+              <ContentPresenter VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="#40282832"/>
+              </Trigger>
+              <Trigger Property="Tag" Value="Selected">
+                <Setter TargetName="Bd" Property="Background" Value="White"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- TOOL CARD : hover glow + scale + press -->
+    <Style x:Key="ToolCardStyle" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="Padding" Value="18,16"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+      <Setter Property="RenderTransform">
+        <Setter.Value>
+          <ScaleTransform ScaleX="1" ScaleY="1"/>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="Effect">
+        <Setter.Value>
+          <DropShadowEffect Color="Black" Opacity="0.4" BlurRadius="12" ShadowDepth="2"/>
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.025" Duration="0:0:0.18"/>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.025" Duration="0:0:0.18"/>
+              <ColorAnimation Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)" To="{StaticResource BorderColor}" Duration="0:0:0.18"/>
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2"/>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2"/>
+              <ColorAnimation Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)" To="{StaticResource BorderColor}" Duration="0:0:0.2"/>
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="PreviewMouseDown">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="0.97" Duration="0:0:0.08"/>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="0.97" Duration="0:0:0.08"/>
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="PreviewMouseUp">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.025" Duration="0:0:0.1"/>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.025" Duration="0:0:0.1"/>
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- BADGE CMD/REG -->
+    <Style x:Key="BadgeStyle" TargetType="Border">
+      <Setter Property="BorderBrush" Value="#2E2E35"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Padding" Value="8,3"/>
+      <Setter Property="Background" Value="#1A1A1F"/>
+    </Style>
+  </Application.Resources>
+</Application>

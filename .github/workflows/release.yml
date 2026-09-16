@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Version depuis le tag
+        id: ver
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart("v")
+          "ver=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Tests
+        run: dotnet test tests/FPSBooster.Tests/FPSBooster.Tests.csproj -c Release
+
+      - name: Publish (self-contained win-x64)
+        run: >
+          dotnet publish src/FPSBooster.App/FPSBooster.App.csproj
+          -c Release -r win-x64 --self-contained true
+          -o publish /p:Version=${{ steps.ver.outputs.ver }}
+
+      - name: Installer Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Compiler l'installeur
+        run: >
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          /DMyAppVersion=${{ steps.ver.outputs.ver }}
+          Setup\R33333ADOptimizer.iss
+
+      - name: Générer version.txt (pour les màj auto de l'app)
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.ver }}"
+          $tag = "${{ github.ref_name }}"
+          $url = "https://github.com/${{ github.repository }}/releases/download/$tag/Setup-R33333ADOptimizer-$ver.exe"
+          @(
+            $ver,
+            $url,
+            "Nouveautés : voir la page de la Release $tag sur GitHub."
+          ) | Set-Content -Path version.txt -Encoding UTF8
+
+      - name: Publier la Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Setup/Output/Setup-R33333ADOptimizer-${{ steps.ver.outputs.ver }}.exe
+            version.txt

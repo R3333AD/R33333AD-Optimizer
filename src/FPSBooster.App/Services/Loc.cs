@@ -1,0 +1,306 @@
+using System.ComponentModel;
+
+namespace FPSBooster.App.Services;
+
+/// <summary>Localisation FR/AR/EN avec bascule en direct (Item[] notifié). Persiste dans settings.txt.</summary>
+public sealed class Loc : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event Action? LanguageChanged;
+
+    private static readonly Dictionary<string, Dictionary<string, string>> Data = new()
+    {
+        ["fr"] = new()
+        {
+            ["Nav_Home"] = "Home", ["Nav_Clean"] = "Cleanup", ["Nav_Fps"] = "FPS & Performance",
+            ["Nav_Input"] = "Input Lag & Latency", ["Nav_Kbd"] = "Keyboard & Mouse",
+            ["Nav_Ram"] = "RAM Memory", ["Nav_Reg"] = "Registry (Regedits)",
+            ["Nav_Svc"] = "Services", ["Nav_Tools"] = "Programs & Tools", ["Nav_Uninst"] = "Uninstaller",
+            ["Nav_Net"] = "Réseau", ["Nav_Prof"] = "Profils",
+            ["Stats_Executed"] = "Exécutés",
+            ["Sub_Home"] = "État du PC • actions rapides",
+            ["Sub_Tools"] = "{0} outils disponibles • exécuter en administrateur",
+            ["Sub_Uninst"] = "{0} programmes • désinstallation + zéro trace",
+            ["Home_Applied"] = "OPTIMISATIONS", ["Home_AppliedSub"] = "appliquées",
+            ["Home_CpuSub"] = "charge temps réel", ["Home_RamSub"] = "mémoire utilisée",
+            ["Home_Boost1"] = "⚡ Boost FPS 1", ["Home_Clean"] = "🧹 Nettoyage rapide",
+            ["Home_Restore"] = "🛡 Point de restauration",
+            ["Home_Bg"] = "🖼 Fond d'écran",
+            ["Home_Overlay"] = "👁 Overlay",
+            ["Un_Refresh"] = "↻ Actualiser", ["Un_ColName"] = "Programme",
+            ["Un_ColVer"] = "Version", ["Un_ColPub"] = "Éditeur", ["Un_ColSize"] = "Taille",
+            ["Un_Uninstall"] = "🗑 Désinstaller + zéro trace",
+            ["Un_PickFirst"] = "Sélectionne un programme",
+            ["Un_UninstallQueue"] = "🗑 Désinstaller la file ({0})",
+            ["Un_QueueEmpty"] = "File vide — coche des programmes avec ⧉",
+            ["Dlg_QueueTitle"] = "Désinstaller la file ?",
+            ["Dlg_QueueMsg"] = "Désinstaller ces {0} programmes à la suite ?\n• {1}\n\nScan des restes après chacun.",
+            ["Un_QueueDone"] = "File terminée : {0} OK / {1} échecs",
+            ["Un_Loading"] = "Chargement des programmes...",
+            ["Un_Loaded"] = "{0} programmes • sélectionne-en un",
+            ["Un_Leftovers"] = "Restes détectés (dossiers + registre)",
+            ["Un_DeleteLeft"] = "Supprimer les restes cochés",
+            ["Un_NothingChecked"] = "Rien de coché",
+            ["Msg_Admin"] = "⚠ Lance en Admin (clic droit → Exécuter en tant qu'admin) pour 100% des tweaks",
+            ["Msg_RestoreToast"] = "🛡 Point de restauration créé (sécurité)",
+            ["Dlg_UnTitle"] = "Confirmer la désinstallation",
+            ["Dlg_UnMsg"] = "Désinstaller « {0} » ?\n\nVersion : {1}\nÉditeur : {2}\n\nEnsuite je scannerai les dossiers + registre restants pour zéro trace.",
+            ["Dlg_DelTitle"] = "Confirmer",
+            ["Dlg_DelMsg"] = "Supprimer définitivement {0} restes ?\n(Dossiers + clés registre — loggés, restauration via point de restauration)",
+            ["Un_Scanning"] = "Scan des restes (dossiers + registre)...",
+            ["Un_Clean"] = "Aucun reste détecté — désinstallation propre ✅",
+            ["Un_Found"] = "{0} restes détectés — vérifie puis « Supprimer les restes cochés »",
+            ["Un_Deleted"] = "Restes supprimés : {0} OK / {1} échecs — zéro trace ✅",
+            ["Un_Uninstalling"] = "Désinstallation de {0}... (suis l'assistant si affiché)",
+            ["Undo_Btn"] = "↩ Annuler",
+            ["Undo_Title"] = "Tout annuler ?",
+            ["Undo_Msg"] = "{0} modifications seront annulées (registre, services, plan d'alimentation).\nLes fichiers supprimés ne sont PAS récupérables.",
+            ["Undo_Done"] = "↩ Restauré : {0} OK / {1} échecs",
+            ["Risk_0"] = "Léger", ["Risk_1"] = "Normal", ["Risk_2"] = "Expert",
+            ["Tray_Open"] = "Ouvrir",
+            ["Tray_Quit"] = "Quitter",
+            ["Tray_MinTitle"] = "R33333AD Optimizer",
+            ["Tray_MinMsg"] = "L'app tourne en arrière-plan (clic droit → Quitter pour fermer)",
+            ["Dlg_BoostAllTitle"] = "CONFIRMATION BOOST ALL",
+            ["Dlg_BoostAllMsg"] = "⚡ BOOST ALL — {0} ({1} outils)\n\n{2}\n{3}\n\n• {4}\n\nUn point de restauration sera créé automatiquement.\nContinuer ?",
+            ["Boost_More"] = "… +{0} autres",
+            ["Help_Title"] = "Aide — R33333AD Optimizer",
+            ["Help_Prereq"] = "Prérequis :",
+            ["Bench_Hist"] = "BENCHMARK — HISTORIQUE",
+            ["Bench_Empty"] = "Lance un benchmark (section Outils) pour voir l'historique",
+            ["Disk_Title"] = "💽 DISQUES",
+            ["Startup_Tip"] = "Lancer R33333AD au démarrage Windows (tâche planifiée, sans UAC)",
+            ["Startup_On"] = "▶ Démarrage auto ON",
+            ["Startup_Off"] = "Démarrage auto OFF",
+            ["Startup_Fail"] = "✕ Échec (admin requis)",
+            ["Sched_Auto"] = "🕒 Auto",
+            ["Sched_Tip"] = "Optimisation auto chaque jour à l'heure choisie (reste actif tant que l'app tourne)",
+            ["SelfUn_Title"] = "Désinstaller R33333AD ?",
+            ["SelfUn_Msg"] = "Supprimer DÉFINITIVEMENT R33333AD Optimizer ?\n\nLogs, réglages, journal et clés registre seront effacés (zéro trace).\nL'application va se fermer.",
+            ["SelfUn_Cancel"] = "Désinstallation annulée",
+            ["SelfUn_Done"] = "R33333AD supprimé ({0} fichiers, {1} clés) — à bientôt !",
+            ["Update_BtnTip"] = "Nouvelle version : {0} — cliquer pour télécharger et installer",
+            ["Update_InstallTitle"] = "Installer la mise à jour ?",
+            ["Update_InstallMsg"] = "{0}\n\nQuitter R33333AD et lancer l'installeur ?",
+            ["Update_NoFile"] = "Installeur introuvable dans Téléchargements",
+            ["Gain_Tip"] = "Gain FPS estimé (indicatif, varie selon PC/jeu — les gains ne s'additionnent pas)",
+            ["Gain_MeasureTip"] = "Mesurer le gain réel : FPS avant → applique le tweak → FPS après (~20 s, jeu lancé)",
+            ["Gain_SortTip"] = "Trier les cartes par gain FPS",
+            ["Gain_Title"] = "Mesurer le gain ?",
+            ["Gain_Msg"] = "Mesurer le gain FPS réel de « {0} » ?\n\nJeu lancé requis (≈10 s de mesure avant, application du tweak, ≈10 s après).",
+            ["Gain_NotMeasurable"] = "Tweak non mesurable en FPS",
+            ["Gain_Measuring"] = "Mesure FPS avant tweak...",
+            ["Gain_Measured"] = "Gain mesuré : {0:+0.0;-0.0} %",
+            ["Help_Msg"] = "R33333AD Optimizer v{0} • Admin : {1}\n\nRaccourcis :\n• Ctrl+Shift+O : overlay HUD\n• Ctrl+Shift+B : BOOST ALL\n• Ctrl+Shift+R : tout annuler\n• Échap (overlay) : fermer • Ctrl+C (overlay) : copier stats\n\nConseils :\n• Lance en admin pour 100% des tweaks.\n• BOOST ALL demande confirmation et crée un point de restauration.\n• Logs : %LocalAppData%\\FPSBooster\\logs",
+        },
+        ["ar"] = new()
+        {
+            ["Nav_Home"] = "الرئيسية", ["Nav_Clean"] = "التنظيف", ["Nav_Fps"] = "FPS & Performance",
+            ["Nav_Input"] = "زمن الإدخال", ["Nav_Kbd"] = "لوحة المفاتيح والفأرة",
+            ["Nav_Ram"] = "ذاكرة RAM", ["Nav_Reg"] = "الريجستري",
+            ["Nav_Svc"] = "الخدمات", ["Nav_Tools"] = "البرامج والأدوات", ["Nav_Uninst"] = "إلغاء التثبيت",
+            ["Nav_Net"] = "الشبكة", ["Nav_Prof"] = "البروفايلات",
+            ["Stats_Executed"] = "المنفذة",
+            ["Sub_Home"] = "حالة الجهاز • إجراءات سريعة",
+            ["Sub_Tools"] = "{0} أدوات متاحة • شغّل كمسؤول",
+            ["Sub_Uninst"] = "{0} برامج • إلغاء تثبيت + بدون بقايا",
+            ["Home_Applied"] = "التحسينات", ["Home_AppliedSub"] = "مُطبَّقة",
+            ["Home_CpuSub"] = "الحمل الحالي", ["Home_RamSub"] = "الذاكرة المستخدمة",
+            ["Home_Boost1"] = "⚡ تعزيز FPS 1", ["Home_Clean"] = "🧹 تنظيف سريع",
+            ["Home_Restore"] = "🛡 نقطة استعادة",
+            ["Home_Bg"] = "🖼 خلفية",
+            ["Home_Overlay"] = "👁 تراكب",
+            ["Un_Refresh"] = "↻ تحديث", ["Un_ColName"] = "البرنامج",
+            ["Un_ColVer"] = "الإصدار", ["Un_ColPub"] = "الناشر", ["Un_ColSize"] = "الحجم",
+            ["Un_Uninstall"] = "🗑 إلغاء التثبيت + بدون بقايا",
+            ["Un_PickFirst"] = "اختر برنامجًا",
+            ["Un_UninstallQueue"] = "🗑 إلغاء تثبيت القائمة ({0})",
+            ["Un_QueueEmpty"] = "القائمة فارغة — حدّد برامج بـ ⧉",
+            ["Dlg_QueueTitle"] = "إلغاء تثبيت القائمة ؟",
+            ["Dlg_QueueMsg"] = "إلغاء تثبيت هذه البرامج الـ {0} بالتتابع ؟\n• {1}\n\nفحص البقايا بعد كل واحد.",
+            ["Un_QueueDone"] = "انتهت القائمة : {0} ناجحة / {1} فاشلة",
+            ["Un_Loading"] = "جارٍ تحميل البرامج...",
+            ["Un_Loaded"] = "{0} برامج • اختر واحدًا",
+            ["Un_Leftovers"] = "البقايا المكتشفة (مجلدات + سجل)",
+            ["Un_DeleteLeft"] = "حذف البقايا المحددة",
+            ["Un_NothingChecked"] = "لا شيء محدد",
+            ["Msg_Admin"] = "⚠ شغّل كمسؤول (زر أيمن ← تشغيل كمسؤول) لجميع التحسينات",
+            ["Msg_RestoreToast"] = "🛡 تم إنشاء نقطة استعادة (أمان)",
+            ["Dlg_UnTitle"] = "تأكيد إلغاء التثبيت",
+            ["Dlg_UnMsg"] = "إلغاء تثبيت « {0} » ؟\n\nالإصدار : {1}\nالناشر : {2}\n\nبعدها سأفحص المجلدات والسجل المتبقي لإزالة كل أثر.",
+            ["Dlg_DelTitle"] = "تأكيد",
+            ["Dlg_DelMsg"] = "حذف {0} بقايا نهائيًا ؟\n(مجلدات + مفاتيح سجل — مسجلة، والاستعادة عبر نقطة الاستعادة)",
+            ["Un_Scanning"] = "فحص البقايا (مجلدات + سجل)...",
+            ["Un_Clean"] = "لا بقايا مكتشفة — إلغاء تثبيت نظيف ✅",
+            ["Un_Found"] = "{0} بقايا مكتشفة — تحقق ثم « حذف البقايا المحددة »",
+            ["Un_Deleted"] = "البقايا المحذوفة : {0} ناجحة / {1} فاشلة — بدون أثر ✅",
+            ["Un_Uninstalling"] = "جارٍ إلغاء تثبيت {0}... (تابع المساعد إن ظهر)",
+            ["Undo_Btn"] = "↩ تراجع",
+            ["Undo_Title"] = "التراجع عن الكل ؟",
+            ["Undo_Msg"] = "سيتم التراجع عن {0} تعديلات (سجل، خدمات، خطة طاقة).\nالملفات المحذوفة غير قابلة للاستعادة.",
+            ["Undo_Done"] = "↩ تمت الاستعادة : {0} ناجحة / {1} فاشلة",
+            ["Risk_0"] = "خفيف", ["Risk_1"] = "عادي", ["Risk_2"] = "خبير",
+            ["Tray_Open"] = "فتح",
+            ["Tray_Quit"] = "إنهاء",
+            ["Tray_MinTitle"] = "R33333AD Optimizer",
+            ["Tray_MinMsg"] = "التطبيق يعمل في الخلفية (زر أيمن ← إنهاء للإغلاق)",
+            ["Dlg_BoostAllTitle"] = "تأكيد BOOST ALL",
+            ["Dlg_BoostAllMsg"] = "⚡ BOOST ALL — {0} ({1} أدوات)\n\n{2}\n{3}\n\n• {4}\n\nسيتم إنشاء نقطة استعادة تلقائيًا.\nمتابعة ؟",
+            ["Boost_More"] = "… +{0} أخرى",
+            ["Help_Title"] = "مساعدة — R33333AD Optimizer",
+            ["Help_Prereq"] = "المتطلبات :",
+            ["Bench_Hist"] = "الاختبار — السجل",
+            ["Bench_Empty"] = "شغّل اختبارًا (قسم الأدوات) لعرض السجل",
+            ["Disk_Title"] = "💽 الأقراص",
+            ["Startup_Tip"] = "تشغيل R33333AD عند بدء Windows (مهمة مجدولة، بدون UAC)",
+            ["Startup_On"] = "▶ بدء تلقائي مفعّل",
+            ["Startup_Off"] = "بدء تلقائي معطّل",
+            ["Startup_Fail"] = "✕ فشل (يلزم مسؤول)",
+            ["Sched_Auto"] = "🕒 تلقائي",
+            ["Sched_Tip"] = "تحسين تلقائي يوميًا في الوقت المختار (ما دام التطبيق يعمل)",
+            ["SelfUn_Title"] = "إلغاء تثبيت R33333AD ؟",
+            ["SelfUn_Msg"] = "حذف R33333AD Optimizer نهائيًا ؟\n\nستُمسح السجلات والإعدادات ومفاتيح السجل.\nسيُغلق التطبيق.",
+            ["SelfUn_Cancel"] = "تم إلغاء إلغاء التثبيت",
+            ["SelfUn_Done"] = "تم حذف R33333AD ({0} ملفات، {1} مفاتيح) — إلى اللقاء !",
+            ["Update_BtnTip"] = "إصدار جديد : {0} — انقر للتنزيل والتثبيت",
+            ["Update_InstallTitle"] = "تثبيت التحديث ؟",
+            ["Update_InstallMsg"] = "{0}\n\nإنهاء R33333AD وتشغيل المثبّت ؟",
+            ["Update_NoFile"] = "المثبّت غير موجود في التنزيلات",
+            ["Gain_Tip"] = "مكسب FPS تقديري (إرشادي، يختلف حسب الجهاز/اللعبة)",
+            ["Gain_MeasureTip"] = "قياس المكسب الحقيقي : قبل ← التطبيق ← بعد (~20 ثانية، اللعبة مشغّلة)",
+            ["Gain_SortTip"] = "ترتيب البطاقات حسب مكسب FPS",
+            ["Gain_Title"] = "قياس المكسب ؟",
+            ["Gain_Msg"] = "قياس مكسب FPS الحقيقي لـ « {0} » ؟\n\nاللعبة مشغّلة مطلوبة (≈10 ثوانٍ قبل، التطبيق، ≈10 بعد).",
+            ["Gain_NotMeasurable"] = "أداة غير قابلة للقياس بـ FPS",
+            ["Gain_Measuring"] = "قياس FPS قبل التحسين...",
+            ["Gain_Measured"] = "المكسب المقاس : {0:+0.0;-0.0} %",
+            ["Help_Msg"] = "R33333AD Optimizer v{0} • مسؤول : {1}\n\nالاختصارات :\n• Ctrl+Shift+O : التراكب\n• Ctrl+Shift+B : تعزيز الكل\n• Ctrl+Shift+R : التراجع عن الكل\n\nنصائح :\n• شغّل كمسؤول لجميع التحسينات.\n• السجلات : %LocalAppData%\\FPSBooster\\logs",
+        },
+        ["en"] = new()
+        {
+            ["Nav_Home"] = "Home", ["Nav_Clean"] = "Cleanup", ["Nav_Fps"] = "FPS & Performance",
+            ["Nav_Input"] = "Input Lag & Latency", ["Nav_Kbd"] = "Keyboard & Mouse",
+            ["Nav_Ram"] = "RAM Memory", ["Nav_Reg"] = "Registry (Regedits)",
+            ["Nav_Svc"] = "Services", ["Nav_Tools"] = "Programs & Tools", ["Nav_Uninst"] = "Uninstaller",
+            ["Nav_Net"] = "Network", ["Nav_Prof"] = "Profiles",
+            ["Stats_Executed"] = "Executed",
+            ["Sub_Home"] = "PC status • quick actions",
+            ["Sub_Tools"] = "{0} tools available • run with administrator privileges",
+            ["Sub_Uninst"] = "{0} programs • uninstall + zero trace",
+            ["Home_Applied"] = "TWEAKS", ["Home_AppliedSub"] = "applied",
+            ["Home_CpuSub"] = "live load", ["Home_RamSub"] = "memory used",
+            ["Home_Boost1"] = "⚡ Boost FPS 1", ["Home_Clean"] = "🧹 Quick cleanup",
+            ["Home_Restore"] = "🛡 Restore point",
+            ["Home_Bg"] = "🖼 Wallpaper",
+            ["Home_Overlay"] = "👁 Overlay",
+            ["Un_Refresh"] = "↻ Refresh", ["Un_ColName"] = "Program",
+            ["Un_ColVer"] = "Version", ["Un_ColPub"] = "Publisher", ["Un_ColSize"] = "Size",
+            ["Un_Uninstall"] = "🗑 Uninstall + zero trace",
+            ["Un_PickFirst"] = "Pick a program first",
+            ["Un_UninstallQueue"] = "🗑 Uninstall queue ({0})",
+            ["Un_QueueEmpty"] = "Queue empty — check programs with ⧉",
+            ["Dlg_QueueTitle"] = "Uninstall queue?",
+            ["Dlg_QueueMsg"] = "Uninstall these {0} programs in a row?\n• {1}\n\nLeftover scan after each.",
+            ["Un_QueueDone"] = "Queue done: {0} OK / {1} failed",
+            ["Un_Loading"] = "Loading programs...",
+            ["Un_Loaded"] = "{0} programs • pick one",
+            ["Un_Leftovers"] = "Detected leftovers (folders + registry)",
+            ["Un_DeleteLeft"] = "Delete checked leftovers",
+            ["Un_NothingChecked"] = "Nothing checked",
+            ["Msg_Admin"] = "⚠ Run as Admin (right-click → Run as administrator) for 100% of tweaks",
+            ["Msg_RestoreToast"] = "🛡 Restore point created (safety)",
+            ["Dlg_UnTitle"] = "Confirm uninstall",
+            ["Dlg_UnMsg"] = "Uninstall \"{0}\"?\n\nVersion: {1}\nPublisher: {2}\n\nThen I will scan leftover folders + registry for zero trace.",
+            ["Dlg_DelTitle"] = "Confirm",
+            ["Dlg_DelMsg"] = "Permanently delete {0} leftovers?\n(Folders + registry keys — logged, restore via restore point)",
+            ["Un_Scanning"] = "Scanning leftovers (folders + registry)...",
+            ["Un_Clean"] = "No leftovers found — clean uninstall ✅",
+            ["Un_Found"] = "{0} leftovers found — review then \"Delete checked leftovers\"",
+            ["Un_Deleted"] = "Leftovers deleted: {0} OK / {1} failed — zero trace ✅",
+            ["Un_Uninstalling"] = "Uninstalling {0}... (follow the wizard if shown)",
+            ["Undo_Btn"] = "↩ Revert",
+            ["Undo_Title"] = "Revert everything?",
+            ["Undo_Msg"] = "{0} changes will be reverted (registry, services, power plan).\nDeleted files are NOT recoverable.",
+            ["Undo_Done"] = "↩ Restored: {0} OK / {1} failed",
+            ["Risk_0"] = "Light", ["Risk_1"] = "Normal", ["Risk_2"] = "Expert",
+            ["Tray_Open"] = "Open",
+            ["Tray_Quit"] = "Quit",
+            ["Tray_MinTitle"] = "R33333AD Optimizer",
+            ["Tray_MinMsg"] = "App running in background (right-click → Quit to close)",
+            ["Dlg_BoostAllTitle"] = "BOOST ALL CONFIRMATION",
+            ["Dlg_BoostAllMsg"] = "⚡ BOOST ALL — {0} ({1} tools)\n\n{2}\n{3}\n\n• {4}\n\nA restore point will be created automatically.\nContinue?",
+            ["Boost_More"] = "… +{0} more",
+            ["Help_Title"] = "Help — R33333AD Optimizer",
+            ["Help_Prereq"] = "Prerequisites:",
+            ["Bench_Hist"] = "BENCHMARK — HISTORY",
+            ["Bench_Empty"] = "Run a benchmark (Tools section) to see history",
+            ["Disk_Title"] = "💽 DISKS",
+            ["Startup_Tip"] = "Launch R33333AD at Windows startup (scheduled task, no UAC)",
+            ["Startup_On"] = "▶ Auto-start ON",
+            ["Startup_Off"] = "Auto-start OFF",
+            ["Startup_Fail"] = "✕ Failed (admin required)",
+            ["Sched_Auto"] = "🕒 Auto",
+            ["Sched_Tip"] = "Automatic optimization every day at the chosen time (while the app runs)",
+            ["SelfUn_Title"] = "Uninstall R33333AD?",
+            ["SelfUn_Msg"] = "Permanently delete R33333AD Optimizer?\n\nLogs, settings, journal and registry keys will be erased (zero trace).\nThe app will close.",
+            ["SelfUn_Cancel"] = "Uninstall cancelled",
+            ["SelfUn_Done"] = "R33333AD removed ({0} files, {1} keys) — bye!",
+            ["Update_BtnTip"] = "New version: {0} — click to download and install",
+            ["Update_InstallTitle"] = "Install the update?",
+            ["Update_InstallMsg"] = "{0}\n\nQuit R33333AD and run the installer?",
+            ["Update_NoFile"] = "Installer not found in Downloads",
+            ["Gain_Tip"] = "Estimated FPS gain (indicative, varies by PC/game — gains don't add up)",
+            ["Gain_MeasureTip"] = "Measure real gain: FPS before → apply tweak → FPS after (~20s, game running)",
+            ["Gain_SortTip"] = "Sort cards by FPS gain",
+            ["Gain_Title"] = "Measure gain?",
+            ["Gain_Msg"] = "Measure the real FPS gain of \"{0}\"?\n\nRunning game required (~10s measure before, apply tweak, ~10s after).",
+            ["Gain_NotMeasurable"] = "Tweak not measurable in FPS",
+            ["Gain_Measuring"] = "Measuring FPS before tweak...",
+            ["Gain_Measured"] = "Measured gain: {0:+0.0;-0.0} %",
+            ["Help_Msg"] = "R33333AD Optimizer v{0} • Admin: {1}\n\nShortcuts:\n• Ctrl+Shift+O: HUD overlay\n• Ctrl+Shift+B: BOOST ALL\n• Ctrl+Shift+R: revert all\n• Esc (overlay): close • Ctrl+C (overlay): copy stats\n\nTips:\n• Run as admin for 100% of tweaks.\n• Logs: %LocalAppData%\\FPSBooster\\logs",
+        },
+    };
+
+    public static Loc Instance { get; } = new();
+
+    private string _current = "fr";
+    public string Current => _current;
+    public bool IsRtl => _current == "ar";
+
+    private Loc()
+    {
+        string saved = SettingsService.Get("lang", "fr");
+        if (Data.ContainsKey(saved)) _current = saved;
+    }
+
+    public string this[string key] => Get(key);
+
+    public string Get(string key, params object[] args)
+    {
+        if (!Data[_current].TryGetValue(key, out string? v))
+        {
+            if (!Data["en"].TryGetValue(key, out string? en))
+            {
+                v = $"[{key}]";
+            }
+            else v = en;
+        }
+        if (args.Length == 0) return v;
+        try { return string.Format(v, args); }
+        catch (FormatException ex)
+        {
+            Logger.Warn($"Loc format clé '{key}': {ex.Message}");
+            return v;
+        }
+    }
+
+    public void Set(string lang)
+    {
+        if (!Data.ContainsKey(lang) || lang == _current) return;
+        _current = lang;
+        SettingsService.Set("lang", lang);
+        Logger.Info($"Langue: {lang}");
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
+        LanguageChanged?.Invoke();
+    }
+}
