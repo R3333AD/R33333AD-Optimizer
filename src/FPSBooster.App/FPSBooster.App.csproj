@@ -20,7 +20,7 @@
     <Using Remove="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\bg.mp4">
+    <Content Include="Assets\bg.mp4" Condition="Exists('Assets\bg.mp4')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\logo.ico">
