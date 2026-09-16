@@ -12,11 +12,15 @@ public static class UpdateService
     public static string CurrentVersion =>
         Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
+    /// <summary>URL par défaut (releases GitHub). Vide explicite = vérification désactivée.</summary>
+    public const string DefaultUpdateUrl =
+        "https://github.com/R3333AD/R33333AD-Optimizer/releases/latest/download/version.txt";
+
     private static readonly HttpClient SharedHttp = new() { Timeout = TimeSpan.FromSeconds(20) };
 
     public static async Task<(bool Found, string Message)> CheckAsync(bool download = true)
     {
-        string url = SettingsService.Get("update_url", "").Trim();
+        string url = SettingsService.Get("update_url", DefaultUpdateUrl).Trim();
         if (string.IsNullOrEmpty(url))
             return (false, "Mises à jour : aucune URL configurée (settings → update_url)");
 

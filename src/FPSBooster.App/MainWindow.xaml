@@ -490,6 +490,23 @@
                        Foreground="White" CaretBrush="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
                        Padding="0,6" ToolTip="HH:mm" TextChanged="SchedTime_Changed"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="2,10,0,0" VerticalAlignment="Center">
+              <CheckBox x:Name="UpdateAutoCheck" Content="{Binding [Update_Auto], Source={x:Static svc:Loc.Instance}}" Foreground="White"
+                        VerticalAlignment="Center" Margin="0,0,10,0" Checked="UpdateAuto_Changed" Unchecked="UpdateAuto_Changed"/>
+              <TextBox x:Name="UpdateUrlBox" Width="280" Height="30" Background="{DynamicResource PanelBrush}" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"
+                       Foreground="White" CaretBrush="White" VerticalContentAlignment="Center" Padding="8,0" Margin="0,0,10,0"
+                       ToolTip="{Binding [Update_UrlTip], Source={x:Static svc:Loc.Instance}}" TextChanged="UpdateUrl_Changed"/>
+              <Button Content="{Binding [Update_Check], Source={x:Static svc:Loc.Instance}}" Height="30" Padding="14,0" FontWeight="SemiBold"
+                      Foreground="White" Background="{DynamicResource BtnBrush}" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Cursor="Hand" Click="UpdateCheck_Click">
+                <Button.Template>
+                  <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                      <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                  </ControlTemplate>
+                </Button.Template>
+              </Button>
+            </StackPanel>
             <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,14,0,0">
               <StackPanel>
                 <TextBlock Text="{Binding [Disk_Title], Source={x:Static svc:Loc.Instance}}" Foreground="#52525B" FontSize="11"/>

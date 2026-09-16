@@ -155,4 +155,20 @@ public class AppFeaturesTests
         }
         Loc.Instance.Set("fr");
     }
+
+    [Test]
+    public void UpdateService_DefaultUrl_PointsToGitHubReleases()
+    {
+        Assert.That(UpdateService.DefaultUpdateUrl,
+            Is.EqualTo("https://github.com/R3333AD/R33333AD-Optimizer/releases/latest/download/version.txt"));
+    }
+
+    [Test]
+    public async Task UpdateService_EmptyUrl_DisabledWithoutNetwork()
+    {
+        SettingsService.Set("update_url", "");
+        var (found, msg) = await UpdateService.CheckAsync();
+        Assert.That(found, Is.False);
+        Assert.That(msg, Does.Contain("aucune URL").Or.Contain("URL"));
+    }
 }

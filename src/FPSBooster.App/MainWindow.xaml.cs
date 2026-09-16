@@ -108,7 +108,7 @@ public partial class MainWindow : Window
         ApplyBackground();
         if (!AdminHelper.IsAdmin())
             ShowToast(Loc.Instance.Get("Msg_Admin"));
-        if (SettingsService.Get("update_auto", "0") == "1")
+        if (SettingsService.Get("update_auto", "1") == "1")
             _ = AutoUpdateCheckAsync();
 
 CpuBar.Width = 20;
@@ -118,6 +118,7 @@ CpuBar.Width = 20;
         InitScheduler();
         RefreshBenchHistory();
         RefreshDiskHealth();
+        InitUpdateSettings();
         _ = InitAutoStartAsync();
     }
 
@@ -816,6 +817,56 @@ CpuBar.Width = 20;
                 .ToList();
         }
         catch (Exception ex) { Logger.Warn($"DiskHealth: {ex.Message}"); }
+    }
+
+    // ---------------- MISES À JOUR ----------------
+
+    private bool _updateUiReady;
+
+    private void InitUpdateSettings()
+    {
+        try
+        {
+            UpdateUrlBox.Text = SettingsService.Get("update_url", UpdateService.DefaultUpdateUrl);
+            UpdateAutoCheck.IsChecked = SettingsService.Get("update_auto", "1") == "1";
+        }
+        catch (Exception ex) { Logger.Warn($"Update settings init: {ex.Message}"); }
+        finally { _updateUiReady = true; }
+    }
+
+    private void UpdateAuto_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_updateUiReady) return;
+        SettingsService.Set("update_auto", UpdateAutoCheck.IsChecked == true ? "1" : "0");
+    }
+
+    private void UpdateUrl_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (!_updateUiReady) return;
+        SettingsService.Set("update_url", (UpdateUrlBox.Text ?? "").Trim());
+    }
+
+    private async void UpdateCheck_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var (found, msg) = await UpdateService.CheckAsync(download: false);
+            string first = msg.Split('\n')[0];
+            if (!found)
+            {
+                UpdateBtn.Visibility = Visibility.Collapsed;
+                ShowToast(first);
+                return;
+            }
+            ShowToast("⬆ " + first);
+            UpdateBtn.Visibility = Visibility.Visible;
+            UpdateBtn.ToolTip = Loc.Instance.Get("Update_BtnTip", first);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("Update check manuel", ex);
+            ShowToast("Échec : " + ex.Message);
+        }
     }
 
     // ---------------- DÉMARRAGE AUTO ----------------
