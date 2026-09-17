@@ -83,6 +83,39 @@ public static class TweakJournal
         catch (Exception ex) { Logger.Error("Journal archive", ex); }
     }
 
+    /// <summary>Retire la PREMIÈRE entrée égale (revert sélectif). Retourne true si trouvée.</summary>
+    public static bool Remove(JournalEntry target)
+    {
+        try
+        {
+            lock (Lock)
+            {
+                if (!File.Exists(Path)) return false;
+                var lines = File.ReadAllLines(Path).ToList();
+                for (int i = lines.Count - 1; i >= 0; i--)
+                {
+                    if (string.IsNullOrWhiteSpace(lines[i])) continue;
+                    try
+                    {
+                        var e = JsonSerializer.Deserialize<JournalEntry>(lines[i]);
+                        if (e == null || !e.Equals(target)) continue;
+                        lines.RemoveAt(i);
+                        File.WriteAllLines(Path, lines);
+                        Logger.Info($"Journal retiré: {target.Area} {target.Hive}\\{target.Key}::{target.Name}");
+                        return true;
+                    }
+                    catch (Exception ex) { Logger.Warn($"Journal remove ligne: {ex.Message}"); }
+                }
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("Journal remove", ex);
+            return false;
+        }
+    }
+
     // ---------- encodage anciennes valeurs ----------
 
     public static string? Encode(object? value, RegistryValueKind kind)

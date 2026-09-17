@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -60,12 +61,43 @@ public static class NetworkService
         return code == 0 ? stdout : $"Ping {host} échoué";
     }
 
-    /// <summary>Reset complet stack réseau (standard gaming). Reboot requis.</summary>
-    public static async Task ResetStackAsync()
+    /// <summary>Reset complet stack réseau (standard gaming). Reboot requis.
+    /// Retourne false si une étape échoue (ex: netsh sans fichier log sur Windows récent).</summary>
+    public static async Task<bool> ResetStackAsync()
     {
-        await CmdHelper.Netsh("winsock reset");
-        await CmdHelper.Netsh("int ip reset");
-        Logger.Info("Stack réseau réinitialisée (reboot requis)");
+        string log = Path.Combine(Path.GetTempPath(), "fpsbooster-netreset.log");
+        var (c1, out1, err1) = await CmdHelper.Netsh("winsock reset");
+        // "int ip reset" exige un fichier journal sur Windows 10/11, sinon exit 1
+        var (c2, out2, err2) = await CmdHelper.Netsh($"int ip reset \"{log}\"");
+        // netsh renvoie parfois 1 alors que tout a réussi : on juge sur le contenu
+        bool ok = IsNetshSuccess(c1, out1 + err1) && IsNetshSuccess(c2, out2 + err2);
+        if (ok)
+            Logger.Info("Stack réseau réinitialisée (reboot requis)");
+        else
+            Logger.Warn($"Reset stack incomplet: winsock={c1} [{Clip(out1 + err1)}], " +
+                $"ip={c2} [{Clip(out2 + err2)}] (détails: {log})");
+        return ok;
+    }
+
+    /// <summary>Succès netsh : code 0, ou contenu sans échec avec au moins une réussite
+    /// (netsh sort parfois en 1 alors que tout est "réussie").</summary>
+    public static bool IsNetshSuccess(int code, string? output)
+    {
+        if (code == 0) return true;
+        string o = output ?? "";
+        if (System.Text.RegularExpressions.Regex.IsMatch(o,
+                @"\b(échec|echec|failed|failure|error|erreur)\b",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            return false;
+        return System.Text.RegularExpressions.Regex.IsMatch(o,
+            @"réussie|successfully|correctement",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    }
+
+    private static string Clip(string? s)
+    {
+        string t = (s ?? "").Trim();
+        return t.Length == 0 ? "—" : t.Length > 600 ? t[..600] + "…" : t;
     }
 
     /// <summary>Désactive les tunnels de transition (Teredo/6to4/ISATAP) = moins d'overhead.</summary>

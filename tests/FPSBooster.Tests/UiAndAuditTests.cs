@@ -135,15 +135,18 @@ public class UiAndAuditTests
             _ = new FPSBooster.App.App();
         var o = new FPSBooster.App.Views.OverlayWindow();
         var l = new FPSBooster.App.Views.LogWindow();
+        var j = new FPSBooster.App.Views.JournalWindow();
         try
         {
             Assert.That(o.IsVisible, Is.False);
             Assert.That(l.IsVisible, Is.False);
+            Assert.That(j.IsVisible, Is.False);
         }
         finally
         {
             o.Close();
             l.Close();
+            j.Close();
         }
     }
 }

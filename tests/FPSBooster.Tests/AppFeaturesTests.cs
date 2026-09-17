@@ -171,4 +171,33 @@ public class AppFeaturesTests
         Assert.That(found, Is.False);
         Assert.That(msg, Does.Contain("aucune URL").Or.Contain("URL"));
     }
+
+    [Test]
+    public void IsNetshSuccess_CodeZero_True()
+    {
+        Assert.That(NetworkService.IsNetshSuccess(0, ""), Is.True);
+    }
+
+    [Test]
+    public void IsNetshSuccess_Exit1AllReussie_True()
+    {
+        string fr = "Réinitialisation de Compartiment réussie.\nRéinitialisation de Protocole réussie.";
+        Assert.That(NetworkService.IsNetshSuccess(1, fr), Is.True);
+    }
+
+    [Test]
+    public void IsNetshSuccess_Exit1WithEchec_False()
+    {
+        Assert.That(NetworkService.IsNetshSuccess(1, "Échec de la réinitialisation de X."), Is.False);
+        Assert.That(NetworkService.IsNetshSuccess(1, "Reset of X failed."), Is.False);
+        Assert.That(NetworkService.IsNetshSuccess(1, ""), Is.False);
+    }
+
+    [Test]
+    public async Task CmdHelper_Silent_ReturnsOutput()
+    {
+        var (code, stdout, _) = await CmdHelper.RunAsync("cmd.exe", "/c echo test-silent", 10_000, silent: true);
+        Assert.That(code, Is.EqualTo(0));
+        Assert.That(stdout.Trim(), Is.EqualTo("test-silent"));
+    }
 }

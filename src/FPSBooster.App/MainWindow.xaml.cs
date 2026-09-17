@@ -254,6 +254,13 @@ CpuBar.Width = 20;
     private void Max_Click(object sender, RoutedEventArgs e) => ToggleMax();
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 
+    private void Journal_Click(object sender, RoutedEventArgs e)
+    {
+        var w = new JournalWindow(() => RefreshRevertBtn()) { Owner = this };
+        w.Show();
+        Logger.Info("Journal ouvert");
+    }
+
     private async void Help_Click(object sender, RoutedEventArgs e)
     {
         string admin = AdminHelper.IsAdmin() ? "oui/yes" : "non/no";
@@ -854,13 +861,12 @@ CpuBar.Width = 20;
             string first = msg.Split('\n')[0];
             if (!found)
             {
-                UpdateBtn.Visibility = Visibility.Collapsed;
+                HideUpdatePill();
                 ShowToast(first);
                 return;
             }
             ShowToast("⬆ " + first);
-            UpdateBtn.Visibility = Visibility.Visible;
-            UpdateBtn.ToolTip = Loc.Instance.Get("Update_BtnTip", first);
+            ShowUpdatePill(first, msg);
         }
         catch (Exception ex)
         {
@@ -1109,23 +1115,57 @@ CpuBar.Width = 20;
             if (!found) return;
             string first = msg.Split('\n')[0];
             ShowToast("⬆ " + first);
-            UpdateBtn.Visibility = Visibility.Visible;
-            UpdateBtn.ToolTip = Loc.Instance.Get("Update_BtnTip", first);
-            Logger.Info("Badge màj affiché: " + first);
+            ShowUpdatePill(first, msg);
+            Logger.Info("Pastille màj affichée: " + first);
         }
         catch (Exception ex) { Logger.Error("AutoUpdate", ex); }
     }
 
-    private async void UpdateBtn_Click(object sender, RoutedEventArgs e)
+    private bool _updateDismissed;
+
+    private void ShowUpdatePill(string firstLine, string fullMsg)
     {
-        UpdateBtn.IsEnabled = false;
+        if (_updateDismissed) return;
+        PillVersionText.Text = firstLine;
+        UpdatePill.ToolTip = fullMsg;
+        UpdatePill.Visibility = Visibility.Visible;
+        try
+        {
+            ((Storyboard)UpdatePill.FindResource("PillEnter")).Begin(UpdatePill, true);
+            ((Storyboard)UpdatePill.FindResource("PillPulse")).Begin(UpdatePill, true);
+        }
+        catch (Exception ex) { Logger.Warn($"Pill anim: {ex.Message}"); }
+    }
+
+    private void HideUpdatePill()
+    {
+        try
+        {
+            ((Storyboard)UpdatePill.FindResource("PillEnter")).Stop(UpdatePill);
+            ((Storyboard)UpdatePill.FindResource("PillPulse")).Stop(UpdatePill);
+        }
+        catch { }
+        UpdatePill.Visibility = Visibility.Collapsed;
+    }
+
+    private void UpdatePill_Dismiss(object sender, RoutedEventArgs e)
+    {
+        _updateDismissed = true;
+        HideUpdatePill();
+        e.Handled = true;
+        Logger.Info("Pastille màj ignorée pour cette session");
+    }
+
+    private async void UpdatePill_Click(object sender, MouseButtonEventArgs e)
+    {
+        UpdatePill.IsEnabled = false;
         try
         {
             var (found, msg) = await UpdateService.CheckAsync(download: true);
             if (!found)
             {
                 ShowToast(msg.Split('\n')[0]);
-                UpdateBtn.Visibility = Visibility.Collapsed;
+                HideUpdatePill();
                 return;
             }
             var confirm = MessageBox.Show(
@@ -1150,7 +1190,7 @@ CpuBar.Width = 20;
             Logger.Error("Update install", ex);
             ShowToast("Échec : " + ex.Message);
         }
-        finally { UpdateBtn.IsEnabled = true; }
+        finally { UpdatePill.IsEnabled = true; }
     }
 
     private void ShowToast(string msg)

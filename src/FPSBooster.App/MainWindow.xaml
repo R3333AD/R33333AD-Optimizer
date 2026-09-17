@@ -41,8 +41,6 @@
             <TextBlock Text="R33333AD Optimizer" Foreground="#D4D4D8" FontSize="13" FontWeight="SemiBold"/>
           </StackPanel>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="UpdateBtn" Content="⬆" Width="32" Height="28" Background="Transparent" Foreground="#C8FF2E"
-                    BorderThickness="0" Cursor="Hand" Click="UpdateBtn_Click" Visibility="Collapsed" FontWeight="Bold"/>
             <Button Content="?" Width="32" Height="28" Background="Transparent" Foreground="#A1A1AA"
                     BorderThickness="0" Cursor="Hand" Click="Help_Click" ToolTip="Aide / Help"/>
             <Button Content="—" Width="32" Height="28" Background="Transparent" Foreground="#A1A1AA"
@@ -308,6 +306,16 @@
               </Button>
               <Button x:Name="RevertBtn" Content="↩ Annuler" Height="36" Padding="16,0" FontWeight="SemiBold" Margin="0,0,10,0"
                       Foreground="White" Background="{DynamicResource BtnBrush}" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Cursor="Hand" Click="Revert_Click">
+                <Button.Template>
+                  <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
+                      <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                  </ControlTemplate>
+                </Button.Template>
+              </Button>
+              <Button x:Name="JournalBtn" Content="{Binding [Journal_Btn], Source={x:Static svc:Loc.Instance}}" Height="36" Padding="14,0" FontWeight="SemiBold" Margin="0,0,10,0"
+                      Foreground="White" Background="{DynamicResource BtnBrush}" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Cursor="Hand" Click="Journal_Click">
                 <Button.Template>
                   <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
@@ -741,6 +749,40 @@
           </Grid>
         </Grid>
       </Grid>
+      <!-- PASTILLE MISE À JOUR (flottante, animée) -->
+      <Border x:Name="UpdatePill" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Top"
+              Margin="0,10,28,0" Visibility="Collapsed" Panel.ZIndex="50" Cursor="Hand" Opacity="0"
+              Background="#E61A1A1F" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+              CornerRadius="12" Padding="14,10" MouseLeftButtonUp="UpdatePill_Click">
+        <Border.Resources>
+          <Storyboard x:Key="PillEnter">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
+            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)" From="60" To="0" Duration="0:0:0.35">
+              <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut"/>
+              </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+          </Storyboard>
+          <Storyboard x:Key="PillPulse" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetProperty="(Border.Effect).(DropShadowEffect.Opacity)" From="0.25" To="0.7" Duration="0:0:0.9"/>
+          </Storyboard>
+        </Border.Resources>
+        <Border.RenderTransform>
+          <TranslateTransform X="60"/>
+        </Border.RenderTransform>
+        <Border.Effect>
+          <DropShadowEffect Color="{DynamicResource AccentColor}" Opacity="0.35" BlurRadius="14" ShadowDepth="0"/>
+        </Border.Effect>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock Text="⬆" Foreground="{DynamicResource AccentBrush}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock x:Name="PillVersionText" Text="Nouvelle version" Foreground="White" FontSize="12" FontWeight="Bold"/>
+            <TextBlock Text="{Binding [Update_PillSub], Source={x:Static svc:Loc.Instance}}" Foreground="{DynamicResource MutedBrush}" FontSize="11"/>
+          </StackPanel>
+          <Button Content="✕" Background="Transparent" Foreground="#71717A" BorderThickness="0" Cursor="Hand"
+                  FontSize="10" Padding="10,0,0,0" VerticalAlignment="Center" Click="UpdatePill_Dismiss"/>
+        </StackPanel>
+      </Border>
       </Grid>
     </Grid>
   </Border>

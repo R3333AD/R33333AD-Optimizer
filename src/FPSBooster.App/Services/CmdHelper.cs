@@ -4,7 +4,7 @@ namespace FPSBooster.App.Services;
 
 public static class CmdHelper
 {
-    public static async Task<(int ExitCode, string Out, string Err)> RunAsync(string file, string args, int timeoutMs = 30_000)
+    public static async Task<(int ExitCode, string Out, string Err)> RunAsync(string file, string args, int timeoutMs = 30_000, bool silent = false)
     {
         try
         {
@@ -34,8 +34,11 @@ public static class CmdHelper
             }
             string o = await outTask;
             string e = await errTask;
-            Logger.Info($"CMD {file} {args} -> exit {p.ExitCode}");
-            if (!string.IsNullOrWhiteSpace(e)) Logger.Warn($"CMD err: {e.Trim()}");
+            if (!silent)
+            {
+                Logger.Info($"CMD {file} {args} -> exit {p.ExitCode}");
+                if (!string.IsNullOrWhiteSpace(e)) Logger.Warn($"CMD err: {e.Trim()}");
+            }
             return (p.ExitCode, o, e);
         }
         catch (Exception ex)

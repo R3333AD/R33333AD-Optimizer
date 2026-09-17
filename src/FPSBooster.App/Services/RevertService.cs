@@ -35,6 +35,32 @@ public static class RevertService
         return (ok, fail);
     }
 
+    /// <summary>Annule UNE seule entrée (revert sélectif) et la retire du journal.</summary>
+    public static async Task<bool> RevertOneAsync(JournalEntry e)
+    {
+        try
+        {
+            bool done = e.Area switch
+            {
+                "reg" => RevertReg(e),
+                "service" => await RevertServiceModeAsync(e),
+                "power" => await RevertPowerAsync(e),
+                _ => false,
+            };
+            if (done)
+            {
+                TweakJournal.Remove(e);
+                Logger.Info($"RevertOne OK {e.Area} {e.Hive}\\{e.Key}::{e.Name}");
+            }
+            return done;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"RevertOne {e.Area} {e.Hive}\\{e.Key}::{e.Name}", ex);
+            return false;
+        }
+    }
+
     private static bool RevertReg(JournalEntry e)
     {
         if (!Enum.TryParse<RegistryHive>(e.Hive, out var hive)) return false;

@@ -21,7 +21,7 @@ public static class PrereqService
             list.Add(new Prereq("powercfg", power, power ? "présent" : "introuvable dans System32"));
             bool presentMon = File.Exists(FpsMeasureService.ToolPath);
             list.Add(new Prereq("PresentMon", presentMon, presentMon ? "présent" : $"absent ({FpsMeasureService.ToolDir})"));
-            string url = SettingsService.Get("update_url", "").Trim();
+            string url = SettingsService.Get("update_url", UpdateService.DefaultUpdateUrl).Trim();
             list.Add(new Prereq("URL màj", !string.IsNullOrEmpty(url),
                 string.IsNullOrEmpty(url) ? "non configurée (settings → update_url)" : "configurée"));
             Logger.Info("Prérequis: " + string.Join(" | ", list.Select(p => $"{p.Name}={(p.Ok ? "OK" : "KO")}")));

@@ -1,6 +1,6 @@
 ; R33333AD Optimizer — installeur (Inno Setup 6)
 #define MyAppName "R33333AD Optimizer"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.2.1"
 #define MyAppExeName "R33333ADOptimizer.exe"
 
 [Setup]

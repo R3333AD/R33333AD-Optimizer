@@ -33,7 +33,8 @@ public static class StartupService
     {
         try
         {
-            var (code, stdout, _) = await CmdHelper.RunAsync("schtasks.exe", $"/Query /TN \"{TaskName}\"", 10_000);
+            // Silencieux : tâche absente = état normal, pas une erreur
+            var (code, stdout, _) = await CmdHelper.RunAsync("schtasks.exe", $"/Query /TN \"{TaskName}\"", 10_000, silent: true);
             return code == 0 && stdout.Contains(TaskName, StringComparison.OrdinalIgnoreCase);
         }
         catch (Exception ex)

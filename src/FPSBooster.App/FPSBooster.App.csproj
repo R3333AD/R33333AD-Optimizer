@@ -11,7 +11,7 @@
     <AssemblyName>R33333ADOptimizer</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Description>FPS et Performance Optimizer - Tokkyo style</Description>
   </PropertyGroup>
   <ItemGroup>

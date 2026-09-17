@@ -194,7 +194,7 @@ public static partial class TweakLibrary
         new("do_nop2p", "Delivery Opt. No P2P", "REG", new[]{"net"},
             () => Task.FromResult(RunDoNoP2P())),
         new("net_reset", "Reset TCP/IP + Winsock", "CMD", new[]{"net"},
-            async () => { await NetworkService.ResetStackAsync(); return Ok("Stack réinitialisée (REBOOT requis)"); }),
+            async () => await NetworkService.ResetStackAsync() ? Ok("Stack réinitialisée (REBOOT requis)") : Fail("Reset stack")),
         new("net_restore", "Restore Network Defaults", "CMD", new[]{"net"},
             async () => { await NetworkService.RestoreNetworkDefaultsAsync(); return Ok("Réseau restauré par défaut"); }),
     };
